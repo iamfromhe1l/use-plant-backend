@@ -1,4 +1,4 @@
-import { IApiResponse } from "../types/error";
+import { IApiResponse } from "@/types/error";
 
 export function successResponse<T>(data: T): IApiResponse<T> {
   return {

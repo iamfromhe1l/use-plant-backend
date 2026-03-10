@@ -1,10 +1,12 @@
 import { api, Header } from "encore.dev/api";
-import { connectToDatabase } from "../db/mongodb";
+import { getAuthData } from "encore.dev/internal/codegen/auth";
+import { connectToDatabase } from "@/db/mongodb";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { ObjectId } from "mongodb";
-import { IApiResponse } from "../types/error";
-import { successResponse, errorResponse } from "../helpers/response";
+import { IApiResponse } from "@/types/error";
+import { successResponse, errorResponse } from "@/helpers/response";
+import { AuthData } from "@/auth/handler";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
@@ -31,10 +33,6 @@ interface AuthResponse {
     email: string;
     name?: string;
   };
-}
-
-interface ValidateTokenRequest {
-  authorization: Header<"Authorization">;
 }
 
 interface ValidateTokenResponse {
@@ -135,7 +133,7 @@ export const changePassword = api(
   async (req: ChangePasswordRequest): Promise<IApiResponse<null>> => {
     try {
       const { db } = await connectToDatabase();
-      const userId = (req as any).auth.userId;
+      const userId = getAuthData<AuthData>()!.userID;
       const { currentPassword, newPassword } = req;
 
       const user = await db.collection("users").findOne({
@@ -183,17 +181,17 @@ export const logout = api(
 
 export const validateToken = api(
   { method: "GET", path: "/auth/validate", expose: true },
-  async (
-    req: ValidateTokenRequest,
-  ): Promise<IApiResponse<ValidateTokenResponse>> => {
+  async ({
+    authorization,
+  }: {
+    authorization?: Header<"Authorization">;
+  }): Promise<IApiResponse<ValidateTokenResponse>> => {
     try {
-      const authHeader = (req as any).headers.authorization;
-
-      if (!authHeader) {
+      if (!authorization) {
         return successResponse({ valid: false });
       }
 
-      const token = authHeader.replace("Bearer ", "");
+      const token = authorization.replace("Bearer ", "");
 
       try {
         jwt.verify(token, JWT_SECRET);
