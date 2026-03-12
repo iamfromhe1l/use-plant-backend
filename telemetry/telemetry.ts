@@ -14,6 +14,8 @@ interface IGetTelemetryRequest {
 interface IGetTelemetryHistoryRequest {
   deviceId: string;
   limit?: number;
+  from?: string;
+  to?: string;
 }
 
 interface IGetWateringHistoryRequest {
@@ -81,9 +83,16 @@ export const getTelemetryHistory = api(
 
       const limit = Math.min(req.limit || 50, 200);
 
+      const filter: Record<string, unknown> = { deviceId: req.deviceId };
+      if (req.from || req.to) {
+        filter.receivedAt = {};
+        if (req.from) (filter.receivedAt as Record<string, unknown>).$gte = req.from;
+        if (req.to) (filter.receivedAt as Record<string, unknown>).$lte = req.to;
+      }
+
       const records = await db
         .collection("telemetry")
-        .find({ deviceId: req.deviceId })
+        .find(filter)
         .sort({ receivedAt: -1 })
         .limit(limit)
         .toArray();
