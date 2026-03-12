@@ -1,9 +1,12 @@
-export type AuthData = null;
+import { getAuthData as _getAuthData } from "encore.dev/internal/codegen/auth";
+import { auth as _auth_auth } from "../../../auth/handler.js";
 
-// getAuthData throws an error until an auth handler is added
+export type AuthData = Awaited<ReturnType<typeof _auth_auth>>;
+
 export function getAuthData(): AuthData | null {
-    throw new Error("authData cannot be called when there are no auth handlers.")
+    return _getAuthData()
 }
+
 declare module "encore.dev/api" {
   interface CallOpts {
     authData?: AuthData;

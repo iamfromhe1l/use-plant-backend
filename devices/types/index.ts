@@ -1,3 +1,9 @@
+export interface IPlant {
+  index: number;
+  name: string;
+  icon: string;
+}
+
 export interface IDevice {
   deviceId: string;
   status: string;
@@ -5,4 +11,5 @@ export interface IDevice {
   lastSeen: Date;
   name: string;
   icon: string;
+  plants: IPlant[];
 }

@@ -53,8 +53,12 @@ export const registerDevice = api(
         registeredAt: new Date(),
         lastSeen: new Date(),
         status: "active",
-        name: "Мое растение",
-        icon: "Leaf",
+        name: "Моё устройство",
+        icon: "Sprout",
+        plants: [
+          { index: 1, name: "Растение 1", icon: "Leaf" },
+          { index: 2, name: "Растение 2", icon: "Flower2" },
+        ],
       });
 
       return successResponse({
@@ -88,6 +92,10 @@ export const getUserDevices = api(
         lastSeen: device.lastSeen,
         name: device.name,
         icon: device.icon,
+        plants: device.plants || [
+          { index: 1, name: "Растение 1", icon: "Leaf" },
+          { index: 2, name: "Растение 2", icon: "Flower2" },
+        ],
       }));
 
       return successResponse(devices);
