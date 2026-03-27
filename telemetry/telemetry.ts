@@ -86,8 +86,8 @@ export const getTelemetryHistory = api(
       const filter: Record<string, unknown> = { deviceId: req.deviceId };
       if (req.from || req.to) {
         filter.receivedAt = {};
-        if (req.from) (filter.receivedAt as Record<string, unknown>).$gte = req.from;
-        if (req.to) (filter.receivedAt as Record<string, unknown>).$lte = req.to;
+        if (req.from) (filter.receivedAt as Record<string, unknown>).$gte = new Date(req.from);
+        if (req.to) (filter.receivedAt as Record<string, unknown>).$lte = new Date(req.to);
       }
 
       const records = await db

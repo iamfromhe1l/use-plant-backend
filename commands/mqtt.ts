@@ -14,11 +14,18 @@ let client: MqttClient | null = null;
 async function handleTelemetry(message: ITelemetryMessage): Promise<void> {
   try {
     const { db } = await connectToDatabase();
-    await db.collection("telemetry").insertOne({
-      deviceId: message.deviceId,
-      plants: message.plants,
-      receivedAt: new Date(),
-    });
+    const now = new Date();
+    await Promise.all([
+      db.collection("telemetry").insertOne({
+        deviceId: message.deviceId,
+        plants: message.plants,
+        receivedAt: now,
+      }),
+      db.collection("devices").updateOne(
+        { deviceId: message.deviceId },
+        { $set: { lastSeen: now } },
+      ),
+    ]);
   } catch (err) {
     console.error("[MQTT] Failed to save telemetry:", err);
   }
