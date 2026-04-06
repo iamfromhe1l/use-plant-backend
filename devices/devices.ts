@@ -128,7 +128,7 @@ export const linkDevice = api(
         .collection("devices")
         .updateOne(
           { deviceId: req.deviceId },
-          { $set: { userId: new ObjectId(userId), status: "active" } },
+          { $set: { userId: new ObjectId(userId), status: "active", lastSeen: new Date() } },
         );
 
       return successResponse({ success: true });
