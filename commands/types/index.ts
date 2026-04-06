@@ -1,6 +1,7 @@
 export const COMMAND_TYPES = {
   WATER_PLANT_1: "water_plant_1",
   WATER_PLANT_2: "water_plant_2",
+  SET_CONDITIONS: "set_conditions",
   DEVICE_RESET: "device_reset",
 } as const;
 
@@ -29,6 +30,12 @@ export const COMMANDS_REGISTRY: ICommandDefinition[] = [
     type: COMMAND_TYPES.WATER_PLANT_2,
     label: "Полить растение 2",
     description: "Запуск полива для растения 2",
+    dangerous: false,
+  },
+  {
+    type: COMMAND_TYPES.SET_CONDITIONS,
+    label: "Обновить условия",
+    description: "Отправка условий автоматического полива на устройство",
     dangerous: false,
   },
   {

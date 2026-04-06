@@ -20,6 +20,9 @@ interface IGetTelemetryHistoryRequest {
 
 interface IGetWateringHistoryRequest {
   deviceId: string;
+  limit?: number;
+  from?: string;
+  to?: string;
 }
 
 export const getLatestTelemetry = api(
@@ -129,11 +132,20 @@ export const getWateringHistory = api(
         return errorResponse("Устройство не найдено", "DEVICE_NOT_FOUND");
       }
 
+      const limit = Math.min(req.limit || 100, 300);
+      const filter: Record<string, unknown> = { deviceId: req.deviceId };
+
+      if (req.from || req.to) {
+        filter.wateredAt = {};
+        if (req.from) (filter.wateredAt as Record<string, unknown>).$gte = new Date(req.from);
+        if (req.to) (filter.wateredAt as Record<string, unknown>).$lte = new Date(req.to);
+      }
+
       const history = await db
         .collection("watering_logs")
-        .find({ deviceId: req.deviceId })
+        .find(filter)
         .sort({ wateredAt: -1 })
-        .limit(50)
+        .limit(limit)
         .toArray();
 
       return successResponse(
