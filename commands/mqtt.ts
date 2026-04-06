@@ -10,6 +10,7 @@ const MQTT_USERNAME = process.env.MQTT_USERNAME || "";
 const MQTT_PASSWORD = process.env.MQTT_PASSWORD || "";
 
 let client: MqttClient | null = null;
+let initialized = false;
 
 async function handleTelemetry(message: ITelemetryMessage): Promise<void> {
   try {
@@ -77,6 +78,15 @@ export function getMqttClient(): MqttClient {
   return client;
 }
 
+export function startMqttBridge(): void {
+  if (initialized) {
+    return;
+  }
+
+  initialized = true;
+  getMqttClient();
+}
+
 export function publishToDevice(
   deviceId: string,
   message: Record<string, unknown>,
@@ -97,6 +107,3 @@ export function publishToDevice(
     });
   });
 }
-
-// Инициализируем MQTT клиент при загрузке модуля
-getMqttClient();
