@@ -18,7 +18,7 @@
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.3.1",
-    "encore.dev": "^1.56.2",
+    "encore.dev": "^1.56.3",
     "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.1.0",
     "mqtt": "^5.15.0"
