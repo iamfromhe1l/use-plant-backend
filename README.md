@@ -186,6 +186,28 @@ Required repository secret:
 
 - `DEPLOY_SSH_KEY`: the private key for the deploy-only SSH key
 
+### Production Runbook
+
+Current production host:
+
+- `72.56.240.75`
+
+Application directory on the server:
+
+- `/srv/use-plant-backend`
+
+Useful commands:
+
+```bash
+ssh root@72.56.240.75
+cd /srv/use-plant-backend
+docker compose ps
+docker compose logs -f backend
+docker compose logs -f mqtt
+docker compose logs -f mongo
+docker compose up -d --build
+```
+
 ### Encore Cloud Platform
 
 Deploy your application to a free staging environment in Encore's development cloud using `git push encore`:
