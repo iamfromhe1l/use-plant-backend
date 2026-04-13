@@ -3,7 +3,7 @@ services:
     image: mongo:8.0
     restart: unless-stopped
     ports:
-      - "27017:27017"
+      - "127.0.0.1:27017:27017"
     volumes:
       - mongo-data:/data/db
     healthcheck:
@@ -20,7 +20,7 @@ services:
       - "1883:1883"
       - "9001:9001"
     volumes:
-      - ./docker/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./docker/mosquitto:/mosquitto/config:ro
       - mosquitto-data:/mosquitto/data
       - mosquitto-log:/mosquitto/log
 
@@ -50,7 +50,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
     ports:
       - "4000:4000"
-      - "9400:9400"
+      - "127.0.0.1:9400:9400"
 
 volumes:
   mongo-data:

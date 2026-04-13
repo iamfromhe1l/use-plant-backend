@@ -161,10 +161,10 @@ docker compose logs -f mongo
 Services:
 
 - API: `http://SERVER_IP:4000`
-- Encore local dashboard: `http://SERVER_IP:9400`
+- Encore local dashboard: `http://127.0.0.1:9400`
 - MQTT TCP: `mqtt://SERVER_IP:1883`
 - MQTT WebSocket: `ws://SERVER_IP:9001`
-- MongoDB: `mongodb://SERVER_IP:27017`
+- MongoDB: `mongodb://127.0.0.1:27017`
 
 Persistent data is stored in Docker volumes:
 
