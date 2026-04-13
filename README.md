@@ -126,6 +126,52 @@ There are many more features to explore in Encore.ts, for example:
 
 See the [self-hosting instructions](https://encore.dev/docs/self-host/docker-build) for how to use `encore build docker` to create a Docker image and configure it.
 
+### Docker Compose
+
+This repository also includes a single-node Docker stack for `backend + MongoDB + MQTT`.
+
+1. Copy the environment template:
+
+```bash
+cp .env.example .env
+```
+
+2. Set at least these values in `.env`:
+
+```bash
+JWT_SECRET=replace-with-a-long-random-string
+MONGODB_DB=use_plant
+MQTT_ENDPOINT=ws://YOUR_SERVER_IP:9001
+```
+
+3. Start the stack:
+
+```bash
+docker compose up -d --build
+```
+
+4. Check logs:
+
+```bash
+docker compose logs -f backend
+docker compose logs -f mqtt
+docker compose logs -f mongo
+```
+
+Services:
+
+- API: `http://SERVER_IP:4000`
+- Encore local dashboard: `http://SERVER_IP:9400`
+- MQTT TCP: `mqtt://SERVER_IP:1883`
+- MQTT WebSocket: `ws://SERVER_IP:9001`
+- MongoDB: `mongodb://SERVER_IP:27017`
+
+Persistent data is stored in Docker volumes:
+
+- `mongo-data`
+- `mosquitto-data`
+- `mosquitto-log`
+
 ### Encore Cloud Platform
 
 Deploy your application to a free staging environment in Encore's development cloud using `git push encore`:
