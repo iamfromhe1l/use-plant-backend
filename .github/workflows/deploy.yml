@@ -12,7 +12,6 @@ concurrency:
 
 jobs:
   deploy:
-    if: ${{ secrets.DEPLOY_SSH_KEY != '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
