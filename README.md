@@ -184,7 +184,7 @@ It deploys on every push to `main` by:
 
 Required repository secret:
 
-- `DEPLOY_SSH_KEY`: the private key for the deploy-only SSH key
+- `DEPLOY_SSH_KEY_B64`: the base64-encoded private key for the deploy-only SSH key
 
 ### Production Runbook
 

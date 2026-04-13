@@ -16,19 +16,16 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      - name: Start SSH agent
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
-
-      - name: Trust production host key
+      - name: Prepare deploy key
         run: |
           mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY_B64 }}" | base64 -d > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H 72.56.240.75 >> ~/.ssh/known_hosts
 
       - name: Trigger server deploy
         run: |
-          ssh -o IdentitiesOnly=yes -o PreferredAuthentications=publickey root@72.56.240.75
+          ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o PreferredAuthentications=publickey root@72.56.240.75
 
       - name: Verify API health
         run: |
