@@ -1,0 +1,36 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-backend-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: ${{ secrets.DEPLOY_SSH_KEY != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Start SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Trust production host key
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H 72.56.240.75 >> ~/.ssh/known_hosts
+
+      - name: Trigger server deploy
+        run: |
+          ssh -o IdentitiesOnly=yes -o PreferredAuthentications=publickey root@72.56.240.75
+
+      - name: Verify API health
+        run: |
+          curl --fail --silent --show-error http://72.56.240.75:4000/auth/validate >/dev/null

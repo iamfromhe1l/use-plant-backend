@@ -172,6 +172,20 @@ Persistent data is stored in Docker volumes:
 - `mosquitto-data`
 - `mosquitto-log`
 
+### GitHub Actions Deploy
+
+The repository includes a deploy workflow at `.github/workflows/deploy.yml`.
+
+It deploys on every push to `main` by:
+
+1. Opening an SSH connection to the production server
+2. Running the forced deploy command on the server
+3. Verifying `http://72.56.240.75:4000/auth/validate`
+
+Required repository secret:
+
+- `DEPLOY_SSH_KEY`: the private key for the deploy-only SSH key
+
 ### Encore Cloud Platform
 
 Deploy your application to a free staging environment in Encore's development cloud using `git push encore`:
