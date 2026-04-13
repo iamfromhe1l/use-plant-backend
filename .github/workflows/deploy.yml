@@ -29,4 +29,11 @@ jobs:
 
       - name: Verify API health
         run: |
-          curl --fail --silent --show-error http://72.56.240.75:4000/auth/validate >/dev/null
+          for _ in $(seq 1 30); do
+            if curl --fail --silent --show-error http://72.56.240.75:4000/auth/validate >/dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "API health check did not succeed in time" >&2
+          exit 1
