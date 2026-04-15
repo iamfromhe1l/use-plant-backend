@@ -84,7 +84,7 @@ export const getTelemetryHistory = api(
         return errorResponse("Устройство не найдено", "DEVICE_NOT_FOUND");
       }
 
-      const limit = Math.min(req.limit || 50, 200);
+      const limit = Number(req.limit || 0);
 
       const filter: Record<string, unknown> = { deviceId: req.deviceId };
       if (req.from || req.to) {
@@ -93,12 +93,13 @@ export const getTelemetryHistory = api(
         if (req.to) (filter.receivedAt as Record<string, unknown>).$lte = new Date(req.to);
       }
 
-      const records = await db
-        .collection("telemetry")
-        .find(filter)
-        .sort({ receivedAt: -1 })
-        .limit(limit)
-        .toArray();
+      let query = db.collection("telemetry").find(filter).sort({ receivedAt: 1 });
+
+      if (limit > 0) {
+        query = query.limit(Math.min(limit, 5000));
+      }
+
+      const records = await query.toArray();
 
       return successResponse(
         records.map((r) => ({
@@ -132,7 +133,7 @@ export const getWateringHistory = api(
         return errorResponse("Устройство не найдено", "DEVICE_NOT_FOUND");
       }
 
-      const limit = Math.min(req.limit || 100, 300);
+      const limit = Number(req.limit || 0);
       const filter: Record<string, unknown> = { deviceId: req.deviceId };
 
       if (req.from || req.to) {
@@ -141,12 +142,13 @@ export const getWateringHistory = api(
         if (req.to) (filter.wateredAt as Record<string, unknown>).$lte = new Date(req.to);
       }
 
-      const history = await db
-        .collection("watering_logs")
-        .find(filter)
-        .sort({ wateredAt: -1 })
-        .limit(limit)
-        .toArray();
+      let query = db.collection("watering_logs").find(filter).sort({ wateredAt: 1 });
+
+      if (limit > 0) {
+        query = query.limit(Math.min(limit, 5000));
+      }
+
+      const history = await query.toArray();
 
       return successResponse(
         history.map((r) => ({
@@ -154,6 +156,7 @@ export const getWateringHistory = api(
           userId: r.userId,
           plantIndex: r.plantIndex,
           level: r.level,
+          source: r.source || "manual",
           wateredAt: r.wateredAt,
         })),
       );

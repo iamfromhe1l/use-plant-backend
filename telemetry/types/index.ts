@@ -11,6 +11,14 @@ export interface ITelemetryMessage {
   plants: IPlantSensorData[];
 }
 
+export interface IWateringMessage {
+  deviceId: string;
+  plantIndex: number;
+  level: number;
+  source: "manual" | "condition_sensor" | "condition_schedule";
+  timestamp: number;
+}
+
 export interface ITelemetryRecord {
   deviceId: string;
   plants: IPlantSensorData[];
@@ -22,5 +30,6 @@ export interface IWateringRecord {
   userId: string;
   plantIndex: number;
   level: number;
+  source: "manual" | "condition_sensor" | "condition_schedule";
   wateredAt: Date;
 }

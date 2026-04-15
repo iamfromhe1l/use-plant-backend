@@ -1,7 +1,7 @@
 import mqtt, { MqttClient } from "mqtt";
 import * as dotenv from "dotenv";
 import { connectToDatabase } from "@/db/mongodb";
-import { ITelemetryMessage } from "@/telemetry/types";
+import { ITelemetryMessage, IWateringMessage } from "@/telemetry/types";
 
 dotenv.config();
 
@@ -32,6 +32,38 @@ async function handleTelemetry(message: ITelemetryMessage): Promise<void> {
   }
 }
 
+async function handleWatering(message: IWateringMessage): Promise<void> {
+  try {
+    const { db } = await connectToDatabase();
+    const device = await db.collection("devices").findOne({ deviceId: message.deviceId });
+
+    if (!device?.userId) {
+      console.error("[MQTT] Failed to save watering: device not linked", message.deviceId);
+      return;
+    }
+
+    await Promise.all([
+      db.collection("watering_logs").insertOne({
+        deviceId: message.deviceId,
+        userId: device.userId,
+        plantIndex: Number(message.plantIndex),
+        level: Math.min(10, Math.max(1, Number(message.level ?? 5))),
+        source:
+          message.source === "condition_sensor" || message.source === "condition_schedule"
+            ? message.source
+            : "manual",
+        wateredAt: new Date(),
+      }),
+      db.collection("devices").updateOne(
+        { deviceId: message.deviceId },
+        { $set: { lastSeen: new Date() } },
+      ),
+    ]);
+  } catch (err) {
+    console.error("[MQTT] Failed to save watering:", err);
+  }
+}
+
 export function getMqttClient(): MqttClient {
   if (client && client.connected) {
     return client;
@@ -54,6 +86,13 @@ export function getMqttClient(): MqttClient {
         console.log("[MQTT] Subscribed to devices/+/telemetry");
       }
     });
+    client!.subscribe("devices/+/watering", { qos: 0 }, (err) => {
+      if (err) {
+        console.error("[MQTT] Watering subscribe error:", err.message);
+      } else {
+        console.log("[MQTT] Subscribed to devices/+/watering");
+      }
+    });
   });
 
   client.on("message", (topic: string, payload: Buffer) => {
@@ -63,6 +102,16 @@ export function getMqttClient(): MqttClient {
         handleTelemetry(message);
       } catch (err) {
         console.error("[MQTT] Failed to parse telemetry:", err);
+      }
+      return;
+    }
+
+    if (topic.endsWith("/watering")) {
+      try {
+        const message: IWateringMessage = JSON.parse(payload.toString());
+        handleWatering(message);
+      } catch (err) {
+        console.error("[MQTT] Failed to parse watering:", err);
       }
     }
   });

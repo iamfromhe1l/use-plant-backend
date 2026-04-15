@@ -65,23 +65,6 @@ export const sendCommand = api(
         sentAt: new Date(),
       });
 
-      // Сохраняем лог полива
-      if (
-        req.command.type === "water_plant_1" ||
-        req.command.type === "water_plant_2"
-      ) {
-        const plantIndex = req.command.type === "water_plant_1" ? 1 : 2;
-        const level = (req.command.payload?.level as number) || 5;
-
-        await db.collection("watering_logs").insertOne({
-          deviceId: req.deviceId,
-          userId: userId,
-          plantIndex,
-          level: Math.min(10, Math.max(1, level)),
-          wateredAt: new Date(),
-        });
-      }
-
       return successResponse({ sent: true });
     } catch (error) {
       console.error("Send command error:", error);

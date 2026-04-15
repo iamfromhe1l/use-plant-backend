@@ -2,6 +2,7 @@ export const COMMAND_TYPES = {
   WATER_PLANT_1: "water_plant_1",
   WATER_PLANT_2: "water_plant_2",
   SET_CONDITIONS: "set_conditions",
+  SET_TELEMETRY_INTERVAL: "set_telemetry_interval",
   DEVICE_RESET: "device_reset",
 } as const;
 
@@ -36,6 +37,12 @@ export const COMMANDS_REGISTRY: ICommandDefinition[] = [
     type: COMMAND_TYPES.SET_CONDITIONS,
     label: "Обновить условия",
     description: "Отправка условий автоматического полива на устройство",
+    dangerous: false,
+  },
+  {
+    type: COMMAND_TYPES.SET_TELEMETRY_INTERVAL,
+    label: "Интервал телеметрии",
+    description: "Обновление интервала отправки телеметрии на устройство",
     dangerous: false,
   },
   {
