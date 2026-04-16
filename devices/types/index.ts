@@ -15,7 +15,8 @@ export interface ISensorRule {
 }
 
 export interface ISchedule {
-  time: string;
+  time?: string;
+  times: string[];
   days: number[];
 }
 
@@ -103,7 +104,17 @@ function normalizeSensorRule(rule: Partial<ISensorRule> | null | undefined): ISe
 }
 
 function normalizeSchedule(schedule?: Partial<ISchedule> | null): ISchedule {
-  const time = typeof schedule?.time === "string" ? schedule.time : "08:00";
+  const times = Array.isArray(schedule?.times)
+    ? Array.from(
+        new Set(
+          schedule.times
+            .filter((time): time is string => typeof time === "string" && isTimeValid(time))
+            .slice(0, 6),
+        ),
+      )
+    : typeof schedule?.time === "string" && isTimeValid(schedule.time)
+      ? [schedule.time]
+      : ["08:00"];
   const days = Array.isArray(schedule?.days)
     ? Array.from(
         new Set(
@@ -114,7 +125,7 @@ function normalizeSchedule(schedule?: Partial<ISchedule> | null): ISchedule {
       ).sort((left, right) => left - right)
     : [];
 
-  return { time, days };
+  return { time: times[0] ?? "08:00", times, days };
 }
 
 export function normalizeWateringCondition(
@@ -262,7 +273,9 @@ export function isWateringConditionValid(condition: IWateringCondition, plantInd
   if (condition.type === "schedule") {
     return Boolean(
       condition.schedule &&
-        isTimeValid(condition.schedule.time) &&
+        Array.isArray(condition.schedule.times) &&
+        condition.schedule.times.length > 0 &&
+        condition.schedule.times.every((time) => isTimeValid(time)) &&
         condition.schedule.days.every((day) => Number.isInteger(day) && day >= 0 && day <= 6),
     );
   }
