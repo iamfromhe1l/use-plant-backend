@@ -30,6 +30,12 @@ const validCommandTypes = new Set<string>(
   COMMANDS_REGISTRY.map((c) => c.type),
 );
 
+function getPlantIndexFromCommandType(type: CommandType): number | null {
+  if (type === "water_plant_1") return 1;
+  if (type === "water_plant_2") return 2;
+  return null;
+}
+
 export const sendCommand = api(
   { method: "POST", path: "/commands/send", expose: true, auth: true },
   async (
@@ -58,12 +64,26 @@ export const sendCommand = api(
         timestamp: Date.now(),
       });
 
+      const sentAt = new Date();
+
       await db.collection("command_logs").insertOne({
         deviceId: req.deviceId,
         userId: new ObjectId(userId),
         command: req.command,
-        sentAt: new Date(),
+        sentAt,
       });
+
+      const plantIndex = getPlantIndexFromCommandType(req.command.type);
+      if (plantIndex) {
+        await db.collection("watering_logs").insertOne({
+          deviceId: req.deviceId,
+          userId: new ObjectId(userId),
+          plantIndex,
+          level: Math.min(10, Math.max(1, Number(req.command.payload?.level ?? 5))),
+          source: "manual",
+          wateredAt: sentAt,
+        });
+      }
 
       return successResponse({ sent: true });
     } catch (error) {
